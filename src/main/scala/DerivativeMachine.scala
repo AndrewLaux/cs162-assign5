@@ -48,7 +48,7 @@ case object PushIntersect extends Instruction
 case object PushNullable extends Instruction
 case class PushRe(re: Regex) extends Instruction
 
-class DerivativeMachine(re: Regex) {
+case class DerivativeMachine(re: Regex) {
   import Regex._
 
   //----------------------------------------------------------------------------
@@ -230,6 +230,5 @@ class DerivativeMachine(re: Regex) {
         }
       }
     }
-
   }
 }
