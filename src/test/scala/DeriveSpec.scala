@@ -220,4 +220,30 @@ class DeriveSpec extends FlatSpec with Matchers {
     val D = new DerivativeMachine(reg)
     val recognize = D.eval(str) should equal(false)
   }
+
+  behavior of "derive"
+  
+  it should "compute the correct derivation 1" in {
+    DerivativeMachine(∅).derive('f') should equal (∅)
+  }
+
+  it should "compute the correct derivation 2" in {
+    val r = (f~o)~o
+    DerivativeMachine(r).derive('a') should equal (∅)
+  }
+
+  it should "compute the correct derivation 3" in {
+    val r = (f~o)~o
+    DerivativeMachine(r).derive('f') should equal (o~o)
+  }
+
+  it should "compute the correct derivation 4" in {
+    val r = f | o
+    DerivativeMachine(r).derive('f') should equal (ε)
+  }
+
+  it should "compute the correct derivation 5" in {
+    val r = f.*
+    DerivativeMachine(r).derive('f') should equal (r)
+  }
 }
