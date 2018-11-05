@@ -48,7 +48,11 @@ case object PushIntersect extends Instruction
 case object PushNullable extends Instruction
 case class PushRe(re: Regex) extends Instruction
 
-case class DerivativeMachine(re: Regex) {
+object DerivativeMachine {
+  def apply(re: Regex) = new DerivativeMachine(re)
+}
+
+class DerivativeMachine(re: Regex) {
   import Regex._
 
   //----------------------------------------------------------------------------
@@ -67,6 +71,7 @@ case class DerivativeMachine(re: Regex) {
   //----------------------------------------------------------------------------
   // Private details.
   //----------------------------------------------------------------------------
+
 
   // Derives a regular expression from the top of 'operands' w.r.t. 'char'.
   // @annotation.tailrec
