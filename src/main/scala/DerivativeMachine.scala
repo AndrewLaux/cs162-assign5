@@ -19,7 +19,6 @@ object `package` {
       case `PushNullable` => "nullable"
       case PushRe(re) => "push " + re.toString
     }
-
     strs.mkString("\n")
   }
 }

@@ -97,8 +97,8 @@ object `package` {
       case (r, `∅`) => ∅
       case (`∅`, r) => ∅
       case (Chars(a), Chars(b)) => Chars(a & b)
-      case (r, KleeneStar(α)) => r
-      case (KleeneStar(α), r) => r
+      case (r, KleeneStar(`α`)) => r
+      case (KleeneStar(`α`), r) => r
       case (r, s) if (r==s) => r
       
       // This case should come after all other cases that handle intersection

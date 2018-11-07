@@ -10,7 +10,7 @@ class DeriveSpec extends FlatSpec with Matchers {
 
   import Regex._
 
-    val b = Chars('b')
+  val b = Chars('b')
   val c = Chars('c')
   val d = Chars('d')
   val f = Chars('f')
