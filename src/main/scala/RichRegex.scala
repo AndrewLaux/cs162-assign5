@@ -17,6 +17,13 @@ object `package` {
     // Concatenate 're' with 'other', simplifying if possible (assumes that 're'
     // and 'other' have already been simplified).
     def ~(other: Regex): Regex = (re, other) match {
+
+      //Simplification cases.
+      case (`∅`, r) => return ∅
+      case (r, `∅`) => return ∅
+      case (r, `ε`) => return re
+      case (`ε`, r) => return other
+
       // This case should come after all other cases that handle concatenation
       // simplification. It handles the case where the concatenation is not
       // right-associative, and transforms it into right-associative form. There
@@ -31,11 +38,25 @@ object `package` {
         }
         replaceRight(re)
       }
+
+      //Default case.
+      case (r, s) => return Concatenate(r, s)
     }
 
     // Union 're' with 'other', simplifying if possible (assumes that 're' and
     // 'other' have already been simplified).
     def |(other: Regex): Regex = (re, other) match {
+
+      //Simplification cases.
+      case (r, `∅`) => r
+      case (`∅`, r) => r
+      case (Chars(a), Chars(b)) => Chars(a ++ b)
+      case (KleeneStar(r), `ε`) => KleeneStar(r)
+      case (`ε`, KleeneStar(r)) => KleeneStar(r)
+      case (KleeneStar(`α`), r) => KleeneStar(α)
+      case (r, KleeneStar(`α`)) => KleeneStar(α)
+      case (r1, r2) if r1 == r2 => r1
+
       // This case should come after all other cases that handle union
       // simplification. It ensures that unions are right-associative and the
       // operands are ordered correctly.
@@ -52,15 +73,34 @@ object `package` {
 
     // Apply the Kleene star to 're', simplifying if possible (assumes that 're'
     // has already been simplified).
-    def * : Regex = ???
+    def * : Regex = re match {
+      case `∅` => `ε`
+      case EmptyString => EmptyString
+      case KleeneStar(r) => KleeneStar(r)
+      case r => KleeneStar(r)
+    }
 
     // Complement 're', simplifying if possible (assumes that 're' has already
     // been simplified).
-    def unary_! : Regex = ???
+    def unary_! : Regex = re match {
+      case `∅` => KleeneStar(α)
+      case `ε` if(ε == EmptyString) => α.+
+      case Complement(r) => r
+      case r => Complement(r)
+    }
 
     // Intersect 're' with 'other', simplifying if possible (assumes that 're'
     // and 'other' have already been simplified).
     def &(other: Regex): Regex = (re, other) match {
+
+      //Simplification cases.
+      case (r, `∅`) => ∅
+      case (`∅`, r) => ∅
+      case (Chars(a), Chars(b)) => Chars(a & b)
+      case (r, KleeneStar(`α`)) => r
+      case (KleeneStar(`α`), r) => r
+      case (r, s) if (r==s) => r
+      
       // This case should come after all other cases that handle intersection
       // simplification. It ensures that intersections are right-associative and
       // the operands are ordered correctly.
@@ -76,22 +116,23 @@ object `package` {
     }
 
     // Shorthand for 1 or more repetitions of re regex.
-    def + : Regex = ???
+    def + : Regex = return re~(KleeneStar(re))
 
     // Shorthand for 0 or 1 instances of re regex.
-    def ? : Regex = ???
+    def ? : Regex = return ε | (re)
 
     // Shorthand for exactly 'num' repetitions of re regex.
-    def ^(num: Int): Regex = ???
+    def ^(num: Int): Regex = if (num == 0) return ε else return (re^(num-1))~re
 
     // Shorthand for at least 'min' repetitions of re regex.
-    def >=(min: Int): Regex = ???
+    def >=(min: Int): Regex = return (re^min)~(KleeneStar(re))
 
     // Shorthand for at most 'max' repetitions of re regex.
-    def <=(max: Int): Regex = ???
+    def <=(max: Int): Regex = if (max == 1) return ε | (re)
+      else return (re<=(max-1))|(re^max)
 
     // Shorthand for at least 'min' but at most 'max' repetitions of re regex.
-    def <>(min: Int, max: Int): Regex = ???
+    def <>(min: Int, max: Int): Regex = (re>=min)&(re<=max)
 
     // Place the regex inside a capture group with the given name.
     def capture(name: String): Regex =

@@ -1,3 +1,4 @@
+
 # Assignment 4: Regex to NFA compiler and powerset VM
 
 ### Deadline: November 20th, 11:59PM
