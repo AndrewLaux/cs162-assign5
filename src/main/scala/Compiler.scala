@@ -39,11 +39,16 @@ object Compiler {
           return ((((IndexedSeq(InitStar) :+ Fork(1, rprg.length + 3)) ++ rprg) :+ PushStar) 
           :+ Jump(-(rprg.length + 2)))      
       }
+
+      //Capture
+      case Capture(str, r) => return compile(r) :+ PushCapture(str)
       
       //EmptyString
       case EmptyString => return IndexedSeq(PushEmpty)
+
       //Empty lang
       case Chars(a) if(a.isEmpty) => IndexedSeq(Reject)
+
       //Charset
       case Chars(a) => {
         return IndexedSeq(MatchSet(a), PushChar)
