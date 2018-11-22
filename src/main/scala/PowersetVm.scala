@@ -58,7 +58,7 @@ class PowersetVm(program: Program) extends VirtualMachine(program) {
         case `PushEmpty` => return runUntilMatchOrAccept( new Thread(thread.pc + 1, thread.progress, thread.priority,  EmptyLeaf +: thread.parse ), todo, result)
         
 
-        case `PushConcat` => return runUntilMatchOrAccept(new Thread(thread.pc + 1, thread.progress, thread.priority, ConcatNode(thread.parse.head, thread.parse.tail.head) +: thread.parse.tail.tail), todo, result)
+        case `PushConcat` => return runUntilMatchOrAccept(new Thread(thread.pc + 1, thread.progress, thread.priority, ConcatNode(thread.parse.tail.head, thread.parse.head) +: thread.parse.tail.tail), todo, result)
           
 
         case `PushLeft` => return runUntilMatchOrAccept(new Thread(thread.pc + 1, thread.progress, "l", LeftNode(thread.parse.head) +: thread.parse.tail), todo, result)
@@ -75,13 +75,13 @@ class PowersetVm(program: Program) extends VirtualMachine(program) {
         val star = thread.parse.tail.head
         val rest = thread.parse.tail.tail
 
-        star match {
-          case StarNode(seq) => return runUntilMatchOrAccept(new Thread(thread.pc + 1, thread.progress, thread.priority, StarNode(body +: seq) +: rest ), todo, result)
-          case _ => {
-            assert(false, "should be unreachable")
-            Set()
+          star match {
+            case StarNode(seq) => return runUntilMatchOrAccept(new Thread(thread.pc + 1, thread.progress, thread.priority, StarNode(body +: seq) +: rest ), todo, result)
+            case _ => {
+              assert(false, "should be unreachable")
+              Set()
+            }
           }
-        }
         }
           
         case PushCapture(name) => return runUntilMatchOrAccept(new Thread(thread.pc +1, thread.progress, thread.priority, CaptureNode(name, thread.parse.head) +: thread.parse.tail), todo, result)
@@ -114,20 +114,30 @@ class PowersetVm(program: Program) extends VirtualMachine(program) {
           }
         }
       }
+      
 
     //Powerset algorithm
     val start = Thread(0, Set[Int](), "", Seq[ParseTree]())
 
-    val endThreads = str.foldLeft(Set[Thread](start)) {
+    val traversals = str.foldLeft(Set[Thread](start)) {
       (acc, ch) => acc.isEmpty match {
-        case false => {
-
-          val matchOrAcceptThreads = runUntilMatchOrAccept(acc.head, acc - firstThread, Set[Thread]())
-
-          matchStringPosition(compact(matchOrAcceptThreads), ch)
-        }
+        case false => matchStringPosition(runUntilMatchOrAccept(acc.head, acc.tail, Set[Thread]()), ch)
         case true => acc
       }
+    }
+
+    //No traversals.
+    if (traversals.isEmpty) return None
+
+    //Possible traversals.
+    else {
+      val accepting = compact(runUntilMatchOrAccept(traversals.head, traversals.tail, Set[Thread]())).filter(thread => program(thread.pc) == Accept)
+
+      //There are no accepting threads.
+      if (accepting.isEmpty) return None
+
+      //We have accepting threads.
+      else return Some(accepting.head.parse.head)
     }
   }
 
