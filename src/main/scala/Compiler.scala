@@ -41,7 +41,7 @@ object Compiler {
       }
 
       //Capture
-      case Capture(str, r) => return compile(r) :+ PushCapture(str)
+      case Capture(str, r) => return parse(r) :+ PushCapture(str)
       
       //EmptyString
       case EmptyString => return IndexedSeq(PushEmpty)

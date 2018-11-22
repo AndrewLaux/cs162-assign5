@@ -23,7 +23,9 @@ class PowersetVmSpec extends FlatSpec with Matchers {
   // Feel free to add more tests, or write many shorter ones.
 
    
-    it should "parse example from piazza" in {
+    it should "parse strings in piazza example" in {
+    import compiler._
+    import parse_tree._ 
 
     val username = (Chars('a'->'z').+).capture("username")
     val date = ((Chars('0'->'9') <= 2).capture("day") ~ Chars('/', '-') ~
@@ -31,17 +33,17 @@ class PowersetVmSpec extends FlatSpec with Matchers {
                   (Chars('0'->'9') ^ 4).capture("year")).capture("date")
     val row = username ~ Chars(',') ~ date
 
-    val program = Compiler.compile(row)
-    val tree = (new PowersetVm(program)).eval("tom,25/5/2002").get
+    val prog = Compiler.compile(row)
+    val tree = (new PowersetVm(prog)).eval("tom,25/5/2002").get
     val extractor = (new Extractor(tree))
-
     extractor.extract("username") should equal (List("tom"))
     extractor.extract("date", "day") should equal (List("25"))
     extractor.extract("date", "month") should equal (List("5"))
     extractor.extract("date", "year") should equal (List("2002"))
+    
   }
 
-  it should "parse strings in {language 1}" in { 
+  it should "parse strings in {language ε}" in { 
     val str = ""
 
     val program = IndexedSeq(PushEmpty, Accept)
@@ -181,16 +183,209 @@ class PowersetVmSpec extends FlatSpec with Matchers {
     (new PowersetVm(program)).eval(str2).get should equal (ConcatNode(RightNode(CharLeaf('b')), LeftNode(CharLeaf('1'))))
   }
 
-  
+  it should "parse strings in {language 32bit hex}" in { 
+
+      val str1 = "0x00001111"
+      val str2 = "0xABABCCCC"
+      val str3 = "0x00F09090"
+
+    val hex = Chars('A' -> 'F') | Chars('0' -> '9')
+    val indicator = Chars('0')~Chars('x')
+    val prog = IndexedSeq(
+      MatchSet(Chars('0').chars), 
+      PushChar, 
+      MatchSet(Chars('x').chars), 
+      PushChar, 
+      MatchSet(Chars('A' -> 'F', '0' -> '9').chars), 
+      PushChar, 
+      MatchSet(Chars('A' -> 'F', '0' -> '9').chars), 
+      PushChar, 
+      MatchSet(Chars('A' -> 'F', '0' -> '9').chars), 
+      PushChar, 
+      MatchSet(Chars('A' -> 'F', '0' -> '9').chars), 
+      PushChar, 
+      MatchSet(Chars('A' -> 'F', '0' -> '9').chars), 
+      PushChar, 
+      MatchSet(Chars('A' -> 'F', '0' -> '9').chars), 
+      PushChar, 
+      MatchSet(Chars('A' -> 'F', '0' -> '9').chars), 
+      PushChar, 
+      MatchSet(Chars('A' -> 'F', '0' -> '9').chars), 
+      PushChar, 
+      PushConcat, 
+      PushConcat, 
+      PushConcat, 
+      PushConcat, 
+      PushConcat, 
+      PushConcat, 
+      PushConcat, 
+      PushConcat, 
+      PushConcat, 
+      Accept)
+
+
+      (new PowersetVm(prog)).eval(str1).get should equal (
+      ConcatNode(CharLeaf('0'),
+      ConcatNode(CharLeaf('x'),
+      ConcatNode(CharLeaf('0'), 
+      ConcatNode(CharLeaf('0'),
+      ConcatNode(CharLeaf('0'),
+      ConcatNode(CharLeaf('0'),
+      ConcatNode(CharLeaf('1'),
+      ConcatNode(CharLeaf('1'),
+      ConcatNode(CharLeaf('1'),CharLeaf('1')))))))))))
+
+      (new PowersetVm(prog)).eval(str2).get should equal (
+      ConcatNode(CharLeaf('0'),
+      ConcatNode(CharLeaf('x'),
+      ConcatNode(CharLeaf('A'), 
+      ConcatNode(CharLeaf('B'),
+      ConcatNode(CharLeaf('A'),
+      ConcatNode(CharLeaf('B'),
+      ConcatNode(CharLeaf('C'),
+      ConcatNode(CharLeaf('C'),
+      ConcatNode(CharLeaf('C'),CharLeaf('C')))))))))))
+
+      (new PowersetVm(prog)).eval(str3).get should equal (
+      ConcatNode(CharLeaf('0'),
+      ConcatNode(CharLeaf('x'),
+      ConcatNode(CharLeaf('0'), 
+      ConcatNode(CharLeaf('0'),
+      ConcatNode(CharLeaf('F'),
+      ConcatNode(CharLeaf('0'),
+      ConcatNode(CharLeaf('9'),
+      ConcatNode(CharLeaf('0'),
+      ConcatNode(CharLeaf('9'),CharLeaf('0')))))))))))
+
+
+    
   }
 
-  
+  it should "not parse strings not in the language (ε)" in {
+    val str = "a"
+
+    val program = IndexedSeq(PushEmpty, Accept)
+
+    Some((new PowersetVm(program)).eval(str)).get should equal (None)
+
+  }
+
+  it should "not parse strings not in the empty language" in {
+    val str = "a"
+
+    val program = IndexedSeq(Reject, Accept)
+
+    Some((new PowersetVm(program)).eval(str)).get should equal (None)
+
+  }
+
+  it should "not parse strings not in the {language (a.*)}" in {
+    val str1= "b"
+    val str2 = "bbbbbbb"
+
+    val program = IndexedSeq(
+      InitStar,
+      Fork(1,5),
+      MatchSet(Chars('a').chars),
+      PushChar,
+      PushStar,
+      Jump(-4),
+      Accept)
+
+    val vm = new PowersetVm(program)
+
+    Some(vm.eval(str1)).get should equal(None)
+    Some(vm.eval(str2)).get should equal(None)
+   
+  }
+
+  it should "not parse strings not in {language (a|b)~(1|2)}" in { 
+    val str1 = "1a"
+    val str2 = "b3"
+
+    val program = IndexedSeq(
+      Fork(1,5), 
+      MatchSet(Chars('a').chars), 
+      PushChar, 
+      PushLeft, 
+      Jump(4), 
+      MatchSet(Chars('b').chars), 
+      PushChar, 
+      PushRight, 
+      Fork(1,5), 
+      MatchSet(Chars('1').chars), 
+      PushChar, 
+      PushLeft, 
+      Jump(4), 
+      MatchSet(Chars('2').chars), 
+      PushChar, 
+      PushRight, 
+      PushConcat, 
+      Accept)
+
+    Some((new PowersetVm(program)).eval(str1)).get should equal (None)
+    Some((new PowersetVm(program)).eval(str2)).get should equal (None)
+  }
+
+  it should "not parse strings not in {language 32bit hex}" in { 
+
+      val str1 = "0x0000"
+      val str2 = "0xABABJJJJ"
+      val str3 = "0x^222aaaa"
+
+    val hex = Chars('A' -> 'F') | Chars('0' -> '9')
+    val indicator = Chars('0')~Chars('x')
+    val prog = IndexedSeq(
+      MatchSet(Chars('0').chars), 
+      PushChar, 
+      MatchSet(Chars('x').chars), 
+      PushChar, 
+      MatchSet(Chars('A' -> 'F', '0' -> '9').chars), 
+      PushChar, 
+      MatchSet(Chars('A' -> 'F', '0' -> '9').chars), 
+      PushChar, 
+      MatchSet(Chars('A' -> 'F', '0' -> '9').chars), 
+      PushChar, 
+      MatchSet(Chars('A' -> 'F', '0' -> '9').chars), 
+      PushChar, 
+      MatchSet(Chars('A' -> 'F', '0' -> '9').chars), 
+      PushChar, 
+      MatchSet(Chars('A' -> 'F', '0' -> '9').chars), 
+      PushChar, 
+      MatchSet(Chars('A' -> 'F', '0' -> '9').chars), 
+      PushChar, 
+      MatchSet(Chars('A' -> 'F', '0' -> '9').chars), 
+      PushChar, 
+      PushConcat, 
+      PushConcat, 
+      PushConcat, 
+      PushConcat, 
+      PushConcat, 
+      PushConcat, 
+      PushConcat, 
+      PushConcat, 
+      PushConcat, 
+      Accept)
+
+
+      Some((new PowersetVm(prog)).eval(str1)).get should equal (None)
+
+      Some((new PowersetVm(prog)).eval(str2)).get should equal (None)
+
+      Some((new PowersetVm(prog)).eval(str3)).get should equal (None)
+
+
+    
+  }
 
 
 
   
 
+
+
   
 
-  // more tests...
+  
+
 }
