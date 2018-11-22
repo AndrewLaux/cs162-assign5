@@ -61,10 +61,10 @@ class PowersetVm(program: Program) extends VirtualMachine(program) {
         case `PushConcat` => return runUntilMatchOrAccept(new Thread(thread.pc + 1, thread.progress, thread.priority, ConcatNode(thread.parse.tail.head, thread.parse.head) +: thread.parse.tail.tail), todo, result)
           
 
-        case `PushLeft` => return runUntilMatchOrAccept(new Thread(thread.pc + 1, thread.progress, "l", LeftNode(thread.parse.head) +: thread.parse.tail), todo, result)
+        case `PushLeft` => return runUntilMatchOrAccept(new Thread(thread.pc + 1, thread.progress, thread.priority + "l", LeftNode(thread.parse.head) +: thread.parse.tail), todo, result)
           
 
-        case `PushRight` => return runUntilMatchOrAccept(new Thread(thread.pc + 1, thread.progress, "r", RightNode(thread.parse.head) +: thread.parse.tail), todo, result)
+        case `PushRight` => return runUntilMatchOrAccept(new Thread(thread.pc + 1, thread.progress, thread.priority + "r", RightNode(thread.parse.head) +: thread.parse.tail), todo, result)
           
 
         case `InitStar` => return runUntilMatchOrAccept( new Thread(thread.pc + 1, thread.progress, thread.priority, StarNode(Seq()) +: thread.parse ), todo, result)
