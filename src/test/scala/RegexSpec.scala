@@ -174,14 +174,33 @@ class RegexSpec extends FlatSpec with Matchers with OptionValues {
     re should equal (norm)
   }
 
+  it should "normalize correctly 3" in {
+    val re = (b | ε) & charA 
+
+    val norm = Intersect(charA, Union(ε, b))
+
+    re should equal (norm)
+  }
+
   behavior of "nullable"
 
-  it should "recognize a nullable regex 1" in { pending }
+    it should "recognize a nullable regex 1" in {
+    (EmptyString).nullable should equal(EmptyString)
+  }
 
-  // more tests...
+  it should "recognize a nullable regex 2" in { 
+    (b.*).nullable should equal(EmptyString)
+  }
 
-  it should "recognize a non-nullable regex 1" in { pending }
+  it should "recognize a nullable regex 3" in { 
+    (EmptyString | b).nullable should equal(EmptyString)
+  }
 
+  it should "recognize a nullable regex 4" in { 
+    (b<=4).nullable should equal(EmptyString)
+  }
+
+<<<<<<< HEAD
   // more tests...
 
   behavior of "ambiguity type checker"
@@ -205,4 +224,37 @@ class RegexSpec extends FlatSpec with Matchers with OptionValues {
   }
 
   // more tests...
+=======
+  it should "recognize a nullable regex 5" in { 
+    (b<>(0,10)).nullable should equal(EmptyString)
+  }
+
+  it should "recognize a nullable regex 6" in { 
+    (b|ε).nullable should equal(EmptyString)
+  }
+
+  it should "recognize a non-nullable regex 1" in { 
+    (Chars()).nullable should equal(Chars()) 
+  }
+
+  it should "recognize a non-nullable regex 2" in { 
+    (c).nullable should equal(Chars()) 
+  }
+
+  it should "recognize a non-nullable regex 3" in { 
+    (b.+).nullable should equal(Chars()) 
+  }
+
+  it should "recognize a non-nullable regex 4" in { 
+    (b|c).nullable should equal(Chars()) 
+  }
+
+  it should "recognize a non-nullable regex 5" in { 
+    (c~b).nullable should equal(Chars()) 
+  }
+
+  it should "recognize a non-nullable regex 6" in { 
+    ((EmptyString)~b).nullable should equal(Chars()) 
+  }
+>>>>>>> 0759f1e45bdde517c63a3fd9ef8888233e85dd93
 }

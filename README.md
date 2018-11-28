@@ -1,3 +1,4 @@
+
 # Assignment 5: Ambiguity type system for regular expressions
 
 ### Soft deadline: November 29, 11:59PM
@@ -109,11 +110,13 @@ of the input regex and is ambiguous for all strings it
 recognizes. Then, you can use the `getString` method you implement to find a
 string that exposes the ambiguity.
 
+
 ## Part 3: The Tests
 
 You will need to write your own unit tests. Testing your own code *is
 part of the grade*. We are looking for the following:
   - Non-trivial tests, i.e., a test that demonstrates that creating a
+
     charset creates a charset is not useful.
   - Good coverage - we don't expect you to go for a 100% test
     coverage, but we do expect you to cover edge cases. You should
@@ -143,6 +146,7 @@ checker in your tests. Note that we use that trait in
 `RegexSpec` extends `OptionValues` if you want to use the way of
 testing optional values we demonstrate in that file.
 
+
 ## Rules
 
 You must use only the purely functional subset of Scala. This means
@@ -168,7 +172,9 @@ your assignment, on the root directory of the repository you cloned,
 
   1. Make sure that you run the unit tests on CSIL and get the result
        you expect.
+
   2. run `turnin assign5@cs162 src`.
+
   3. Read the instructions on the screen and the list of files you are
        submitting carefully and submit the assignment only if you are
        sure that you are submitting all the files.
