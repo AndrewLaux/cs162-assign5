@@ -23,7 +23,25 @@ case class Dfa[State](delta: Transitions[State], init: State, fin: Set[State]) {
 
   // Returns a string that causes an arbitrary but non-looping path from the
   // init state to a final state, if such a path exists.
-  def getString: Option[String] = ???
+  def getString: Option[String] = {
+  if (fin.isEmpty) return None
+  val path = find(init, Set[State](), fin.head).get
+  return Option((path.zip(path.tail)).foldLeft(""){ (z, i: (State, State)) =>  z + delta(i._1).find(_._2 == i._2).get._1.minElement.get.toString })
+  } 
+
+  //Depth first traversal of DFA searching for target:
+  def find(current: State, seen: Set[State], target: State ): Option[Seq[State]] = {
+    if (current == target) return Some(Seq(current))
+    else delta(current).foreach{ 
+      next => {
+        if(!seen.contains(next._2)){
+          val far = find(next._2, seen + next._2, target)
+          if(far.isDefined) return Some(Seq(current) ++ far.get)
+        }
+      }
+    }
+    return None
+  }
 
   //----------------------------------------------------------------------------
   // Private details.

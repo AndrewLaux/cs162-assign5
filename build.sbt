@@ -11,7 +11,7 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.0.5" % "test"
 )
 
-initialCommands in console := """import edu.ucsb.cs.cs162._; import edu.ucsb.cs.cs162.range_set._; import edu.ucsb.cs.cs162.regex._; import edu.ucsb.cs.cs162.regex.Regex._"""
+initialCommands in console := """import edu.ucsb.cs.cs162._; import edu.ucsb.cs.cs162.range_set._; import edu.ucsb.cs.cs162.regex._; import edu.ucsb.cs.cs162.regex.Regex._; import edu.ucsb.cs.cs162.dfa._; import edu.ucsb.cs.cs162.regex.derivative._"""
 
 initialCommands in consoleQuick := ""
 

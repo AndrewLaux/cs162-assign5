@@ -53,11 +53,6 @@ object DerivativeAnalysis {
 
   // Compute the transitions and set of reachable states (i.e., Regexes) for all
   // Regexes in 'todo'.
-<<<<<<< HEAD
-  // @annotation.tailrec
-  private def computeDfa(todo: Set[Regex], visitedStates: Set[Regex],
-    transitions: Transitions[Regex]) : (Set[Regex], Transitions[Regex]) = ???
-=======
   @annotation.tailrec
   private def computeDfa(todo: Set[Regex], visitedStates: Set[Regex], transitions: Transitions[Regex]) : (Set[Regex], Transitions[Regex]) = {
 
@@ -72,7 +67,6 @@ object DerivativeAnalysis {
       return computeDfa(currentdeltas._1.filter(!visitedStates.contains(_)) ++ todo.drop(1), visitedStates + todo.head, transitions ++ currentdeltas._2)
     }
   }
->>>>>>> 0759f1e45bdde517c63a3fd9ef8888233e85dd93
 
   // Compute the transitions and destination states from the given regex.
   private def computeNext(state: Regex): (Set[Regex], Transitions[Regex]) = {

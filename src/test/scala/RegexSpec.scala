@@ -17,6 +17,11 @@ class RegexSpec extends FlatSpec with Matchers with OptionValues {
   val e = Chars('e')
   val f = Chars('f')
 
+  val set1 = Chars('1'->'4')
+  val set2 = Chars('2'->'4')
+  val set3 = Chars('5'->'6')
+  
+
   val r = Chars('a') | Chars('b').+
   val r1 = Chars('x', 'y').* ~ r
   val r2 = Chars('y', 'x').+ ~ r
@@ -200,31 +205,10 @@ class RegexSpec extends FlatSpec with Matchers with OptionValues {
     (b<=4).nullable should equal(EmptyString)
   }
 
-<<<<<<< HEAD
   // more tests...
 
-  behavior of "ambiguity type checker"
-
-  it should "find the ambiguous subexpression and a witness string in an ambiguous regex" in {
-    val a = Chars('a')
-    val b = Chars('b')
-    val r = a ~ (b | ε) ~ (b | ε)
-    val (ambiguousSubexpr, witness) = r.unambiguous.value
-    ambiguousSubexpr should equal ((b | ε) ~ (b | ε))
-    new DerivativeMachine(ambiguousSubexpr).eval(witness) shouldEqual true
-  }
 
   // more tests...
-
-  it should "return None if the string is unambiguous" in {
-    val a = Chars('a')
-    val b = Chars('b')
-    val r = a ~ (b | ε)
-    r.unambiguous shouldEqual None
-  }
-
-  // more tests...
-=======
   it should "recognize a nullable regex 5" in { 
     (b<>(0,10)).nullable should equal(EmptyString)
   }
@@ -256,5 +240,76 @@ class RegexSpec extends FlatSpec with Matchers with OptionValues {
   it should "recognize a non-nullable regex 6" in { 
     ((EmptyString)~b).nullable should equal(Chars()) 
   }
->>>>>>> 0759f1e45bdde517c63a3fd9ef8888233e85dd93
+
+  
+  behavior of "ambiguity type checker"
+
+  it should "find the ambiguous subexpression and a witness string in an ambiguous regex" in {
+    val a = Chars('a')
+    val b = Chars('b')
+    val r = a ~ (b | ε) ~ (b | ε)
+    val (ambiguousSubexpr, witness) = r.unambiguous.value
+    ambiguousSubexpr should equal ((b | ε) ~ (b | ε))
+    new DerivativeMachine(ambiguousSubexpr).eval(witness) shouldEqual true
+  }
+
+  it should "find the ambiguous subexpression and a witness string in an ambiguous regex 2" in {
+    val b = Chars('b')
+    val reg = (Union(b, b))
+    val (ambiguousSubexpr, witness) = reg.unambiguous.value
+    ambiguousSubexpr should equal (Union(b, b))
+    new DerivativeMachine(ambiguousSubexpr).eval(witness) shouldEqual true
+  }
+
+  it should "find the ambiguous subexpression and a witness string in an ambiguous regex 3" in {
+    val b = Chars('b')
+    val reg = c~c~(Union(b, b))
+    val (ambiguousSubexpr, witness) = reg.unambiguous.value
+    ambiguousSubexpr should equal ((Union(b, b)))
+    new DerivativeMachine(ambiguousSubexpr).eval(witness) shouldEqual true
+  }
+
+
+  it should "find the ambiguous subexpression and a witness string in an ambiguous regex 4" in {
+    val b = Chars('b')
+    val reg = (Union((b^3),(b~b~b)))
+    val (ambiguousSubexpr, witness) = reg.unambiguous.value
+    ambiguousSubexpr should equal (Union((b^3),(b~b~b)))
+    new DerivativeMachine(ambiguousSubexpr).eval(witness) shouldEqual true
+  }
+
+  it should "find the ambiguous subexpression and a witness string in an ambiguous regex 5" in {
+    val reg = ((b | ε).*)
+    val (ambiguousSubexpr, witness) = reg.unambiguous.value
+    ambiguousSubexpr should equal ((b | ε).*)
+    new DerivativeMachine(ambiguousSubexpr).eval(witness) shouldEqual true
+  }
+
+  it should "find the ambiguous subexpression and a witness string in an ambiguous regex 6" in {
+    val reg = (((b | ε).*)~((b | ε).*))
+    val (ambiguousSubexpr, witness) = reg.unambiguous.value
+    ambiguousSubexpr should equal ((b | ε).*)
+    new DerivativeMachine(ambiguousSubexpr).eval(witness) shouldEqual true
+  }
+
+  // more tests...
+
+  it should "return None if the string is unambiguous" in {
+    val a = Chars('a')
+    val b = Chars('b')
+    val r = a ~ (b | ε)
+    r.unambiguous shouldEqual None
+  }
+
+  it should "return None if the string is unambiguous 2" in {
+    val a = Chars('a')
+    val r = a.*
+    r.unambiguous shouldEqual None
+  }
+
+  it should "return None if the string is unambiguous 3" in {
+    val a = Chars('a')
+    val r = (a <= 4)
+    r.unambiguous shouldEqual None
+  }
 }

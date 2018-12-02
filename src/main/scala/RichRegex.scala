@@ -284,6 +284,57 @@ object `package` {
     // returns the ambiguous sub-expression (the first one for which ambiguity
     // is detected, if there is more than one) and a string that exposes the
     // ambiguity of that sub-expression.
-    def unambiguous: Option[(Regex, String)] = ???
+    def unambiguous: Option[(Regex, String)] = re match {
+      
+      //Union of regular expressions:
+      case Union(r1, r2) => {
+        val r1res = r1.unambiguous
+        val r2res = r2.unambiguous
+        if(r1res.isEmpty) {
+          if(r2res.isEmpty) {
+            if(Intersect(r1, r2).empty == true) {return None
+            }else return Some((re, DerivativeAnalysis.analyze(re).getString.get))
+          }else return r2res
+        }else return r1res
+      }
+
+      //Concatenation of regular expressions:
+      case Concatenate(r1, r2) => {
+        val r1res = r1.unambiguous
+        val r2res = r2.unambiguous
+        if(r1res.isEmpty) {
+          if(r2res.isEmpty) {
+            if(r1.overlap(r2).empty == true) {return None
+            }else return Some((re, DerivativeAnalysis.analyze(re).getString.get))
+          }else return r2res
+        }else return r1res
+      }
+
+      //Kleene Star of regular expression:
+      case KleeneStar(r1) => {
+        val r1res = r1.unambiguous
+        if(r1res.isEmpty) {
+          if(r1.nullable != EmptyString){
+            if(r1.overlap(KleeneStar(r1)).empty == true) {return None
+            }else return Some((re, DerivativeAnalysis.analyze(re).getString.get))
+          }else return Some((re, DerivativeAnalysis.analyze(re).getString.get))
+        }else return r1res
+      }
+
+      //Base cases:
+      case `∅` => return None
+      case `ε` => return None
+      case Chars(c) => return None
+
+      //Exceptions
+      case Intersect(r1, r2) => throw new IllegalArgumentException("Cannot type check non constructive operations.")
+      case Complement(r) => throw new IllegalArgumentException("Cannot type check non constructive operations.")
+
+
+
+
+
+
+    }
   }
 }
