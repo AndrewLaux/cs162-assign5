@@ -321,6 +321,9 @@ object `package` {
         }else return r1res
       }
 
+      //Capturenode:
+      case Capture(name, r) => return r.unambiguous
+
       //Base cases:
       case `∅` => return None
       case `ε` => return None
