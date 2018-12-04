@@ -286,7 +286,40 @@ class RegexSpec extends FlatSpec with Matchers with OptionValues {
   }
 
   it should "find the ambiguous subexpression and a witness string in an ambiguous regex 6" in {
-    val reg = (((b | ε).*)~((b | ε).*))
+
+    //Should find the first of nested ambiguous subexprs:
+    val reg = Concatenate(KleeneStar(EmptyString),(((b | ε).*)~((b | ε).*)))
+    val (ambiguousSubexpr, witness) = reg.unambiguous.value
+    ambiguousSubexpr should equal (KleeneStar(EmptyString))
+    new DerivativeMachine(ambiguousSubexpr).eval(witness) shouldEqual true
+  }
+
+  it should "find the ambiguous subexpression and a witness string in an ambiguous regex 7" in {
+    
+    //KleeneStar where inner is nullable:
+    val inside = EmptyString
+    val reg = KleeneStar(inside)
+    val (ambiguousSubexpr, witness) = reg.unambiguous.value
+    ambiguousSubexpr shouldEqual reg
+    new DerivativeMachine(ambiguousSubexpr).eval(witness) shouldEqual true
+  }
+
+  it should "find the ambiguous subexpression and a witness string in an ambiguous regex 8" in {
+
+    //inner is not nullable and overlap not empty
+    val inside = Concatenate(Union(b,ε), b)
+    inside.nullable shouldEqual ∅
+    (inside overlap KleeneStar(inside)).empty shouldEqual false
+    val reg = KleeneStar(inside)
+    val (ambiguousSubexpr, witness) = reg.unambiguous.value
+    ambiguousSubexpr shouldEqual reg
+    new DerivativeMachine(ambiguousSubexpr).eval(witness) shouldEqual true
+  }
+
+  it should "find the ambiguous subexpression and a witness string in an ambiguous regex 9" in {
+
+    //ambiguity in capture node.
+    val reg = Capture("foo",((b | ε).*))
     val (ambiguousSubexpr, witness) = reg.unambiguous.value
     ambiguousSubexpr should equal ((b | ε).*)
     new DerivativeMachine(ambiguousSubexpr).eval(witness) shouldEqual true
@@ -310,6 +343,13 @@ class RegexSpec extends FlatSpec with Matchers with OptionValues {
   it should "return None if the string is unambiguous 3" in {
     val a = Chars('a')
     val r = (a <= 4)
+    r.unambiguous shouldEqual None
+  }
+
+  it should "return None if the string is unambiguous 4" in {
+    val a = Chars('a')
+    val b = Chars('b')
+    val r = ((a~b~a)|(b~a~b)).*
     r.unambiguous shouldEqual None
   }
 }

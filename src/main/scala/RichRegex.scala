@@ -292,8 +292,9 @@ object `package` {
         val r2res = r2.unambiguous
         if(r1res.isEmpty) {
           if(r2res.isEmpty) {
-            if(Intersect(r1, r2).empty == true) {return None
-            }else return Some((re, DerivativeAnalysis.analyze(re).getString.get))
+            val intersect = Intersect(r1, r2)
+            if(intersect.empty == true) {return None
+            }else return Some((re, DerivativeAnalysis.analyze(intersect).getString.get))
           }else return r2res
         }else return r1res
       }
@@ -304,8 +305,9 @@ object `package` {
         val r2res = r2.unambiguous
         if(r1res.isEmpty) {
           if(r2res.isEmpty) {
-            if(r1.overlap(r2).empty == true) {return None
-            }else return Some((re, DerivativeAnalysis.analyze(re).getString.get))
+            val overlap = r1.overlap(r2)
+            if(overlap.empty == true) {return None
+            }else return Some((re, DerivativeAnalysis.analyze(overlap).getString.get))
           }else return r2res
         }else return r1res
       }
@@ -315,8 +317,9 @@ object `package` {
         val r1res = r1.unambiguous
         if(r1res.isEmpty) {
           if(r1.nullable != EmptyString){
-            if(r1.overlap(KleeneStar(r1)).empty == true) {return None
-            }else return Some((re, DerivativeAnalysis.analyze(re).getString.get))
+            val overlap = r1.overlap(KleeneStar(r1))
+            if(overlap.empty == true) {return None
+            }else return Some((re, DerivativeAnalysis.analyze(overlap).getString.get))
           }else return Some((re, DerivativeAnalysis.analyze(re).getString.get))
         }else return r1res
       }
